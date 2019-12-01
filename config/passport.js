@@ -1,6 +1,7 @@
 var passport = require("passport");
 var User = require("../models/User");
 var LocalStrategy = require("passport-local").Strategy;
+var bcryptjs = require("bcryptjs")
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -64,10 +65,13 @@ passport.use(
         if (!user) {
           return done(null, false, { message: "No user with this email Id" });
         }
-        if(!user.validPassword(password)){
-            return done(null,false , {message:"Wrong Password"})
-        }
-        return done(null ,user)
+        bcryptjs.compare(password, user.password).then(isCorrect=>{
+          if (! isCorrect )
+          return done(null,false , {message:"Wrong Password"})
+          else
+          return done(null ,user)
+        }).catch();
+
       });
     }
   )
