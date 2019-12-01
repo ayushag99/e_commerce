@@ -32,7 +32,7 @@ router.get("/profile", isLoggedin, function(req, res, next) {
 
 router.get("/logout", isLoggedin, (req, res) => {
   req.logout();
-  res.redirect();
+  res.redirect('/');
 });
 
 router.use("/", notLoggedIn, function(req, res, next) {
