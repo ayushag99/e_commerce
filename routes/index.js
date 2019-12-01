@@ -13,7 +13,8 @@ var csrfProtection = csrf();
 router.get("/", function(req, res, next) {
   Product.find()
     .then(products => {
-      res.render("shop/index", { products: products });
+      var successMsg = req.flash('success')[0];
+      res.render("shop/index", { products: products , successMsg:successMsg});
     })
     .catch();
 });
@@ -31,22 +32,22 @@ router.get("/add-to-cart/:id", (req, res) => {
     .catch(err => res.redirect("/"));
 });
 
-router.get('/reduce/:id',(req,res)=>{
+router.get("/reduce/:id", (req, res) => {
   var productId = req.params.id;
-  var cart = new Cart(req.session ? req.session.cart :{})
+  var cart = new Cart(req.session ? req.session.cart : {});
 
-  cart.reduceByOne(productId)
+  cart.reduceByOne(productId);
   req.session.cart = cart;
-  res.redirect('/shopping-cart');
-})
-router.get('/remove/:id',(req,res)=>{
+  res.redirect("/shopping-cart");
+});
+router.get("/remove/:id", (req, res) => {
   var productId = req.params.id;
-  var cart = new Cart(req.session ? req.session.cart :{})
+  var cart = new Cart(req.session ? req.session.cart : {});
 
-  cart.removeAll(productId)
+  cart.removeAll(productId);
   req.session.cart = cart;
-  res.redirect('/shopping-cart');
-})
+  res.redirect("/shopping-cart");
+});
 
 router.get("/shopping-cart", (req, res) => {
   if (!req.session.cart) {
@@ -58,17 +59,18 @@ router.get("/shopping-cart", (req, res) => {
     totalPrice: cart.totalPrice
   });
 });
-router.get("/checkout",isLoggedin, (req, res) => {
+router.get("/checkout", isLoggedin, (req, res) => {
   if (!req.session.cart) {
-    return res.redirect('/shopping-cart');
+    return res.redirect("/shopping-cart");
   }
   var cart = new Cart(req.session.cart);
-  res.render('shop/checkout' , {total:cart.totalPrice})
+  var err = req.flash('error')[0];
+  res.render("shop/checkout", { total: cart.totalPrice ,errMsg:err , noError:!err});
 });
 
-router.post("/checkout",isLoggedin, (req,res)=>{
+router.post("/checkout", isLoggedin, (req, res) => {
   if (!req.session.cart) {
-    return res.redirect('/shopping-cart');
+    return res.redirect("/shopping-cart");
   }
   var order = new Order({
     user: req.user,
@@ -77,21 +79,34 @@ router.post("/checkout",isLoggedin, (req,res)=>{
     address: req.body.address,
     name: req.body.name,
     amount: req.session.cart.totalPrice,
-    items: req.session.cart.totalQty,
-
-  })
-  order.save().then(order=>{
-    console.log(order)
-  }).catch(err=>console.log(err));
-  req.session.cart=null;
+    items: req.session.cart.totalQty
+  });
+  order
+    .save()
+    .then(order => {
+      console.log(order);
+    })
+    .catch(err => {
+      console.log(err);
+      req.flash(
+        "error",
+        "Some error occured, Please retry"
+      );
+      res.redirect("/checkout")
+    });
+  req.flash(
+    "success",
+    "Order Placed, check from User Management > User Account"
+  );
+  req.session.cart = null;
   res.redirect("/");
-})
+});
 
 module.exports = router;
-function isLoggedin(req,res,next){
-  if(req.isAuthenticated()){
-      return next();
+function isLoggedin(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
   }
   req.session.oldUrl = req.url;
-  res.redirect('/user/signin');
+  res.redirect("/user/signin");
 }
