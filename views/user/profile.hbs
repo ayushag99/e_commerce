@@ -1,0 +1,32 @@
+<h1>User Profile</h1>
+
+
+<div class="card" style="width: 100%">
+    <div class="card-header">
+        Your Orders:
+    </div>
+    <ul class="list-group list-group-flush">
+        {{# each orders}}
+        <li class="list-group-item">
+            {{!-- <div class="card-header">
+                <strong style="margin-left:auto"></strong>
+            </div> --}}
+            <ul class="list-group list-group-flush" >
+                {{# each this.items}}
+                <li class="list-group-item">
+                    <div style="display: inline;">{{this.item.title}}</div>
+                    <div style="display: inline;">{{this.qty}}</div>
+                    <div style="display: inline;">{{this.item.price}}</div>
+                    <div style="display: inline;">{{this.price}}</div>
+
+                </li>
+                {{/ each}}
+            </ul>
+            <div class="card-header" style="display:flex;">
+                <strong>Total:</strong>
+                <strong style="margin-left:auto">${{this.cart.totalPrice}}</strong>
+            </div>
+        </li>
+        {{/ each}}
+    </ul>
+</div>

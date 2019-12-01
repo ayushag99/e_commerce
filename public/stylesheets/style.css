@@ -1,0 +1,10 @@
+.description{
+  color:#5c5c5c;
+}
+.price{
+  font-weight: bold;
+  font-size: 16px;
+}
+.heighto{
+  min-height:80vh;
+}
